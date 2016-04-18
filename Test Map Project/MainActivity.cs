@@ -19,11 +19,12 @@ namespace Test_Map_Project
     [Activity(Label = "Test_Map_Project", MainLauncher = true, Icon = "@drawable/icon")]
     public class MainActivity : Activity, IOnMapReadyCallback, ILocationListener
     {
-        //private GoogleMap _map;
+        private GoogleMap _map;
         private MapFragment _mapFragment;
         private Location _currentLocation;
         private LocationManager _locationManager;
         private string _locationProvider;
+        private bool _isLocationInitialized = false;
 
         //location listener functions
 
@@ -31,7 +32,11 @@ namespace Test_Map_Project
         {
             //check if location is null
             if (location != null)
-            { 
+            {
+                if (!_isLocationInitialized)
+                {
+                    setInitialMapLocation();
+                }
                 _currentLocation = location;
             }
         }
@@ -96,19 +101,39 @@ namespace Test_Map_Project
 
             //toss in a check to see if GPS enabled
 
-            try
+            Boolean isGPSEnabled = _locationManager.IsProviderEnabled(LocationManager.GpsProvider);
+            if (isGPSEnabled)
             {
-                _locationManager.RequestLocationUpdates(LocationManager.GpsProvider, 0, 0, this);
-            }
-            catch
-            {
-            }
-            try
-            {
-                _currentLocation = _locationManager.GetLastKnownLocation(LocationManager.GpsProvider);
-            }
-            catch
-            {
+                if (_currentLocation == null)
+                {
+                    Console.WriteLine("GPS enabled, but current location null.");
+                    try
+                    {
+                        _locationManager.RequestLocationUpdates(LocationManager.GpsProvider, 0, 0, this);
+                    }
+                    catch
+                    {
+                    }
+                    if (_locationManager != null)
+                    {
+                        Console.WriteLine("GPS enabled, current location null, location manager not null");
+                        try
+                        {
+                            _currentLocation = _locationManager.GetLastKnownLocation(LocationManager.GpsProvider);
+                        }
+                        catch
+                        {
+                        }
+
+                        if (_currentLocation != null)
+                        {
+                            OnLocationChanged(_currentLocation); // Invokes the onLocationChanged method.
+                        }
+                        else {
+                            Console.WriteLine("retrieveCoordinates(): Location retrieval is not ready.");
+                        }
+                    }
+                }
             }
 
         }
@@ -121,7 +146,7 @@ namespace Test_Map_Project
             if (_mapFragment == null)
             {
                 GoogleMapOptions mapOptions = new GoogleMapOptions()
-                    .InvokeMapType(GoogleMap.MapTypeHybrid)
+                    .InvokeMapType(GoogleMap.MapTypeNormal)
                     .InvokeZoomControlsEnabled(true)
                     .InvokeCompassEnabled(true);
 
@@ -134,22 +159,37 @@ namespace Test_Map_Project
             //init map too. 
             _mapFragment.GetMapAsync(this);
         }
-
+        
         //readies IOnMapReadyCallback
         public void OnMapReady(GoogleMap map)
         {
-            map
+            _map = map;
+            if (!_isLocationInitialized)
+            {
+                setInitialMapLocation();
+            }
+        }
+
+        private void setInitialMapLocation()
+        {
+            
             //CameraUpdate defaultLongLat = CameraUpdateFactory.NewLatLng(new LatLng(40.76793169992044, -73.98180484771729));
             if (_currentLocation != null)
             {
                 CameraUpdate defaultLongLat = CameraUpdateFactory.NewLatLng(new LatLng(_currentLocation.Latitude, _currentLocation.Longitude));
                 CameraUpdate zoomLevel = CameraUpdateFactory.ZoomTo(15);
 
-                map.MoveCamera(defaultLongLat);
-                map.AnimateCamera(zoomLevel);
+                //is map ready?
+                if (_map != null)
+                {
+                    _map.MoveCamera(defaultLongLat);
+                    _map.AnimateCamera(zoomLevel);
+                    _map.AddMarker(new MarkerOptions().SetPosition(new LatLng(_currentLocation.Latitude, _currentLocation.Longitude)).SetTitle("Current Location"));
+                    _isLocationInitialized = true;
+                }
 
                 //add marker, not sure if works. 
-                map.AddMarker(new MarkerOptions().SetPosition(new LatLng(_currentLocation.Latitude, _currentLocation.Longitude)).SetTitle("Current Location"));
+                
             }
         }
 
