@@ -8,16 +8,20 @@ using Android.Widget;
 using Android.OS;
 using Android.Gms.Maps;
 using Android.Gms.Maps.Model;
+    
+//OnMapLongClickListener
 using Android.Support.V4.App;
 using Android.Locations;
 using System.Linq;
+
+using Test_Map_Project;
 
 
 
 namespace Test_Map_Project
 {
     [Activity(Label = "Test_Map_Project", MainLauncher = true, Icon = "@drawable/icon")]
-    public class MainActivity : Activity, IOnMapReadyCallback, ILocationListener
+    public class MainActivity : Activity, IOnMapReadyCallback, ILocationListener, GoogleMap.IOnMapLongClickListener
     {
         private GoogleMap _map;
         private MapFragment _mapFragment;
@@ -25,6 +29,8 @@ namespace Test_Map_Project
         private LocationManager _locationManager;
         private string _locationProvider;
         private bool _isLocationInitialized = false;
+        private MapHelper _myMapHelper = new MapHelper();
+        //.setOnMapLongClickListener(this); 
 
         //location listener functions
 
@@ -35,10 +41,18 @@ namespace Test_Map_Project
             {
                 if (!_isLocationInitialized)
                 {
-                    setInitialMapLocation();
+                    _isLocationInitialized = _myMapHelper.setInitialMapLocation(_currentLocation, _map, this);
                 }
                 _currentLocation = location;
             }
+        }
+
+        //IOnMapLongClickListener implementation
+        public void OnMapLongClick(LatLng point)
+        {
+            //todo: add marker when long pressed
+            //save markers (use text file example)
+            Console.WriteLine("long clicky");
         }
 
         public void OnProviderDisabled(string provider) { }
@@ -49,39 +63,33 @@ namespace Test_Map_Project
 
         protected override void OnCreate(Bundle bundle)
         {
+            
             base.OnCreate(bundle);
 
             // Set our view from the "main" layout resource
             SetContentView(Resource.Layout.Main);
             InitMapFragment();
             InitializeLocationManager();
-            //InitDefaultLocation();
         }
-    
 
-        //---------------------------
-
-        private void InitDefaultLocation()
+        //readies IOnMapReadyCallback
+        public void OnMapReady(GoogleMap map)
         {
-            //setup map for getmapasync
-            //if (_map != null) return;
-            //_locationManager.RequestLocationUpdates(LocationManager.GpsProvider, )
-            //get current location for starters. 
-            //Geocoder geocoder = new Geocode(rthis);
-            //geocoder.GetFromLocationAsync(_currentLocation.Latitude, _currentLocation.Longitude, 10);
-            //CameraUpdate defaultLongLat = CameraUpdateFactory.NewLatLng(new LatLng(_currentLocation.Latitude, _currentLocation.Longitude));
-            //CameraUpdate defaultLongLat = CameraUpdateFactory.NewLatLng(new LatLng(40.76793169992044, -73.98180484771729));
-            //CameraUpdate zoomLevel = CameraUpdateFactory.ZoomTo(15);
-            //can't use map: not initialized with mapfragment.  Need to get from mapfragment first. 
-            //_map.MoveCamera(defaultLongLat);
-            //_map.AnimateCamera(zoomLevel);
-
+            _map = map;
+            if (!_isLocationInitialized)
+            {
+                _isLocationInitialized = _myMapHelper.setInitialMapLocation(_currentLocation, _map, this);
+                _map.SetOnMapLongClickListener(this);
+            }
         }
 
+
+
+
+        //helper functions
         void InitializeLocationManager()
         {
             _locationManager = (LocationManager)GetSystemService(LocationService);
-
             Criteria criteriaForLocationService = new Criteria
             {
                 Accuracy = Accuracy.Fine
@@ -159,39 +167,7 @@ namespace Test_Map_Project
             //init map too. 
             _mapFragment.GetMapAsync(this);
         }
-        
-        //readies IOnMapReadyCallback
-        public void OnMapReady(GoogleMap map)
-        {
-            _map = map;
-            if (!_isLocationInitialized)
-            {
-                setInitialMapLocation();
-            }
-        }
 
-        private void setInitialMapLocation()
-        {
-            
-            //CameraUpdate defaultLongLat = CameraUpdateFactory.NewLatLng(new LatLng(40.76793169992044, -73.98180484771729));
-            if (_currentLocation != null)
-            {
-                CameraUpdate defaultLongLat = CameraUpdateFactory.NewLatLng(new LatLng(_currentLocation.Latitude, _currentLocation.Longitude));
-                CameraUpdate zoomLevel = CameraUpdateFactory.ZoomTo(15);
-
-                //is map ready?
-                if (_map != null)
-                {
-                    _map.MoveCamera(defaultLongLat);
-                    _map.AnimateCamera(zoomLevel);
-                    _map.AddMarker(new MarkerOptions().SetPosition(new LatLng(_currentLocation.Latitude, _currentLocation.Longitude)).SetTitle("Current Location"));
-                    _isLocationInitialized = true;
-                }
-
-                //add marker, not sure if works. 
-                
-            }
-        }
 
     }
 }
