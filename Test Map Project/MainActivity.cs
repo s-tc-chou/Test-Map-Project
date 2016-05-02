@@ -1,5 +1,7 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
+using System.Collections;
 using Android.App;
 using Android.Content;
 using Android.Runtime;
@@ -8,8 +10,6 @@ using Android.Widget;
 using Android.OS;
 using Android.Gms.Maps;
 using Android.Gms.Maps.Model;
-    
-//OnMapLongClickListener
 using Android.Support.V4.App;
 using Android.Locations;
 using System.Linq;
@@ -21,16 +21,15 @@ using Test_Map_Project;
 namespace Test_Map_Project
 {
     [Activity(Label = "Test_Map_Project", MainLauncher = true, Icon = "@drawable/icon")]
-    public class MainActivity : Activity, IOnMapReadyCallback, ILocationListener, GoogleMap.IOnMapLongClickListener
+    public class MainActivity : Activity, IOnMapReadyCallback, ILocationListener, GoogleMap.IOnMapLongClickListener//, GoogleMap.IOnMapClickListener
     {
         private GoogleMap _map;
         private MapFragment _mapFragment;
         private Location _currentLocation;
         private LocationManager _locationManager;
         private string _locationProvider;
-        private bool _isLocationInitialized = false;
-        private MapHelper _myMapHelper = new MapHelper();
-        //.setOnMapLongClickListener(this); 
+        private initializers _initializerBundle = new initializers();         //toss initializers into a bundle.
+        private ArrayList _markerList = new ArrayList();
 
         //location listener functions
 
@@ -39,9 +38,9 @@ namespace Test_Map_Project
             //check if location is null
             if (location != null)
             {
-                if (!_isLocationInitialized)
+                if (!_initializerBundle.getIsLocationInitialized())
                 {
-                    _isLocationInitialized = _myMapHelper.setInitialMapLocation(_currentLocation, _map, this);
+                    _initializerBundle.setIsLocationInitialized(MapHelper.setInitialMapLocation(_currentLocation, _map, this));
                 }
                 _currentLocation = location;
             }
@@ -50,10 +49,21 @@ namespace Test_Map_Project
         //IOnMapLongClickListener implementation
         public void OnMapLongClick(LatLng point)
         {
-            //todo: add marker when long pressed
+            //update touch location
+            _currentLocation.Longitude = point.Longitude;
+            _currentLocation.Latitude = point.Latitude;
             //save markers (use text file example)
-            Console.WriteLine("long clicky");
+            if (_map != null)
+            {
+                //     Console.WriteLine("long clicky");
+                Marker touchPoint = _map.AddMarker(new MarkerOptions()
+                                .SetPosition(new LatLng(_currentLocation.Latitude, _currentLocation.Longitude))
+                                .SetTitle("long click"));
+                //note: initial marker will not be saved. Need to figure out how to access global vars here from another class. 
+                _markerList.Add(touchPoint);
+            }
         }
+
 
         public void OnProviderDisabled(string provider) { }
 
@@ -61,9 +71,66 @@ namespace Test_Map_Project
 
         public void OnStatusChanged(string provider, Availability status, Bundle extras) { }
 
+        protected override void OnPause()
+        {
+            //   Console.WriteLine("on pause is called");
+
+            base.OnPause();
+
+            var path = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDcim);//System.Environment.GetFolderPath(Android.OS.Environment.GetExternalStoragePublicDirectory());
+            string filename = path.AbsolutePath + "locations.txt";
+
+            //write to file
+            foreach (Marker curPoint in _markerList)
+            {
+                //if initial run, don't append.  else append. 
+                using (var streamWriter = new StreamWriter(filename, _initializerBundle.getIsMapFileInitialized())) //don't append for now. 
+                {
+                    LatLng markerPos = curPoint.Position;
+                    //ideally: back up all the information about the marker.  For now I want just long lat. 
+                    streamWriter.WriteLine(markerPos.Latitude + "," + markerPos.Longitude + "," + curPoint.Title);
+                    Console.WriteLine(markerPos.Latitude + "," + markerPos.Longitude + "," + curPoint.Title);
+                }
+            }
+            if (!_initializerBundle.getIsMapFileInitialized())
+            {
+                _initializerBundle.setisMapFileInitialized(true);
+            }
+        }
+
+        protected override void OnResume()
+        {
+            base.OnResume();
+            var path = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDcim);//System.Environment.GetFolderPath(Android.OS.Environment.GetExternalStoragePublicDirectory());
+            string filename = path.AbsolutePath + "locations.txt";
+            string line;
+            string[] parsedLine;
+            LatLng markerPos;
+
+
+            if (File.Exists(filename))
+            {
+                using (var myReader = new StreamReader(filename, true))
+                {
+                    while ((line = myReader.ReadLine()) != null)
+                    {
+                        parsedLine = line.Split(',');
+                        markerPos = new LatLng(Double.Parse(parsedLine[0]), Double.Parse(parsedLine[1]));
+                        Console.WriteLine(markerPos.Latitude + "," + markerPos.Longitude + "," + parsedLine[2]);
+                    }
+
+                }
+            }
+            else
+            {
+                Console.WriteLine("file doesn't exist");
+            }
+
+        }
+
         protected override void OnCreate(Bundle bundle)
         {
-            
+
             base.OnCreate(bundle);
 
             // Set our view from the "main" layout resource
@@ -76,9 +143,9 @@ namespace Test_Map_Project
         public void OnMapReady(GoogleMap map)
         {
             _map = map;
-            if (!_isLocationInitialized)
+            if (!_initializerBundle.getIsLocationInitialized())
             {
-                _isLocationInitialized = _myMapHelper.setInitialMapLocation(_currentLocation, _map, this);
+                _initializerBundle.setIsLocationInitialized(MapHelper.setInitialMapLocation(_currentLocation, _map, this));
                 _map.SetOnMapLongClickListener(this);
             }
         }
@@ -168,7 +235,38 @@ namespace Test_Map_Project
             _mapFragment.GetMapAsync(this);
         }
 
+        //bundled initializers
+        private class initializers
+        {
+            private bool isLocationInitialized = false;
+            private bool isMapFileInitialized = false;
+
+            public bool getIsLocationInitialized()
+            {
+                return isLocationInitialized;
+            }
+
+            public void setIsLocationInitialized(bool setter)
+            {
+                isLocationInitialized = setter;
+            }
+
+            public bool getIsMapFileInitialized()
+            {
+                return isMapFileInitialized;
+            }
+
+            public void setisMapFileInitialized(bool setter)
+            {
+                isMapFileInitialized = setter;
+            }
+
+
+        }
+
 
     }
+
+    
 }
 
