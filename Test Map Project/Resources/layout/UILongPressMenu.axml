@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:p1="http://schemas.android.com/apk/res/android"
+    p1:orientation="vertical"
+    p1:layout_width="match_parent"
+    p1:layout_height="match_parent"
+    p1:id="@+id/linearLayout1">
+    <GridLayout
+        p1:minWidth="25px"
+        p1:minHeight="25px"
+        p1:layout_width="match_parent"
+        p1:layout_height="match_parent"
+        p1:id="@+id/gridLayout1"
+        p1:columnCount="3"
+        p1:rowCount="2">
+        <ImageButton
+            p1:src="@drawable/button1"
+            p1:layout_width="100dp"
+            p1:layout_height="100dp"
+            p1:id="@+id/imageButton1"
+            p1:scaleType="fitXY"
+            p1:adjustViewBounds="true"
+            p1:paddingTop="7dp"
+            p1:paddingBottom="7dp"
+            p1:paddingLeft="2dp"
+            p1:paddingRight="2dp"
+            layout_gravity="center_horizontal" />
+        <ImageButton
+            p1:src="@drawable/button2"
+            p1:layout_width="100dp"
+            p1:layout_height="100dp"
+            p1:id="@+id/imageButton2"
+            p1:scaleType="fitXY"
+            p1:adjustViewBounds="true"
+            p1:paddingTop="7dp"
+            p1:paddingBottom="7dp"
+            p1:paddingLeft="2dp"
+            p1:paddingRight="2dp"
+            layout_gravity="center_horizontal" />
+        <ImageButton
+            p1:src="@drawable/button3"
+            p1:layout_width="100dp"
+            p1:layout_height="100dp"
+            p1:id="@+id/imageButton3"
+            p1:scaleType="fitXY"
+            p1:adjustViewBounds="true"
+            p1:paddingTop="7dp"
+            p1:paddingBottom="7dp"
+            p1:paddingLeft="2dp"
+            p1:paddingRight="2dp"
+            layout_gravity="center_horizontal" />
+        <ImageButton
+            p1:src="@drawable/button4"
+            p1:layout_width="100dp"
+            p1:layout_height="100dp"
+            p1:id="@+id/imageButton4"
+            p1:scaleType="fitXY"
+            p1:adjustViewBounds="true"
+            p1:paddingTop="7dp"
+            p1:paddingBottom="7dp"
+            p1:paddingLeft="2dp"
+            p1:paddingRight="2dp"
+            layout_gravity="center_horizontal" />
+        <ImageButton
+            p1:src="@drawable/button5"
+            p1:layout_width="100dp"
+            p1:layout_height="100dp"
+            p1:id="@+id/imageButton5"
+            p1:scaleType="fitXY"
+            p1:adjustViewBounds="true"
+            p1:paddingTop="7dp"
+            p1:paddingBottom="7dp"
+            p1:paddingLeft="2dp"
+            p1:paddingRight="2dp"
+            layout_gravity="center_horizontal" />
+        <ImageButton
+            p1:src="@drawable/button6"
+            p1:layout_width="100dp"
+            p1:layout_height="100dp"
+            p1:id="@+id/imageButton6"
+            p1:scaleType="fitXY"
+            p1:adjustViewBounds="true"
+            p1:paddingTop="7dp"
+            p1:paddingBottom="7dp"
+            p1:paddingLeft="2dp"
+            p1:paddingRight="2dp"
+            layout_gravity="center_horizontal" />
+    </GridLayout>
+</LinearLayout>

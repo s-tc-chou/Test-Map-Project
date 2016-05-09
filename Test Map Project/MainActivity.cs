@@ -14,14 +14,14 @@ using Android.Support.V4.App;
 using Android.Locations;
 using System.Linq;
 
-using Test_Map_Project;
+
 
 
 
 namespace Test_Map_Project
 {
     [Activity(Label = "Test_Map_Project", MainLauncher = true, Icon = "@drawable/icon")]
-    public class MainActivity : Activity, IOnMapReadyCallback, ILocationListener, GoogleMap.IOnMapLongClickListener//, GoogleMap.IOnMapClickListener
+    public class MainActivity : FragmentActivity, IOnMapReadyCallback, ILocationListener, GoogleMap.IOnMapLongClickListener
     {
         private GoogleMap _map;
         private MapFragment _mapFragment;
@@ -62,6 +62,14 @@ namespace Test_Map_Project
                 //note: initial marker will not be saved. Need to figure out how to access global vars here from another class. 
                 _markerList.Add(touchPoint);
             }
+
+            //launch menu 
+
+            var dialog = new LongPressMenuFragmentUI.LongPressMenuFragment();
+                dialog.Show(SupportFragmentManager, "dialog");
+            
+
+
         }
 
 
@@ -84,7 +92,8 @@ namespace Test_Map_Project
             foreach (Marker curPoint in _markerList)
             {
                 //if initial run, don't append.  else append. 
-                using (var streamWriter = new StreamWriter(filename, _initializerBundle.getIsMapFileInitialized())) //don't append for now. 
+                //Ideally this should read/write to a DB to retrieve points for each user.  
+                using (var streamWriter = new StreamWriter(filename, _initializerBundle.getIsMapFileInitialized())) 
                 {
                     LatLng markerPos = curPoint.Position;
                     //ideally: back up all the information about the marker.  For now I want just long lat. 
