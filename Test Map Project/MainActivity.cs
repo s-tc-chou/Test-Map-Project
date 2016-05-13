@@ -52,24 +52,16 @@ namespace Test_Map_Project
             //update touch location
             _currentLocation.Longitude = point.Longitude;
             _currentLocation.Latitude = point.Latitude;
-            //save markers (use text file example)
-            if (_map != null)
-            {
-                //     Console.WriteLine("long clicky");
-                Marker touchPoint = _map.AddMarker(new MarkerOptions()
-                                .SetPosition(new LatLng(_currentLocation.Latitude, _currentLocation.Longitude))
-                                .SetTitle("long click"));
-                //note: initial marker will not be saved. Need to figure out how to access global vars here from another class. 
-                _markerList.Add(touchPoint);
-            }
 
             //launch menu 
-
-            var dialog = new LongPressMenuFragmentUI.LongPressMenuFragment();
-                dialog.Show(SupportFragmentManager, "dialog");
+            var popupMenu = new LongPressMenuFragmentUI.LongPressMenuFragment();
+            popupMenu.Show(SupportFragmentManager, "longPressMenu");
+            //int buttonPressed = popupMenu.getButtonPressed();
             
-
-
+            /*if (_map != null)
+            {
+                setMarker(buttonPressed);
+            }*/
         }
 
 
@@ -243,6 +235,60 @@ namespace Test_Map_Project
             //init map too. 
             _mapFragment.GetMapAsync(this);
         }
+
+        public void setMarker(int buttonPressed)
+        {
+
+            switch (buttonPressed)
+            {
+                case 1:
+                    Marker touchPoint = _map.AddMarker(new MarkerOptions()
+                            .SetPosition(new LatLng(_currentLocation.Latitude, _currentLocation.Longitude))
+                            .SetTitle("long click"));
+                    _markerList.Add(touchPoint);
+                    Console.WriteLine("case 1");
+                    break;
+                case 2:
+                    touchPoint = _map.AddMarker(new MarkerOptions()
+                            .SetPosition(new LatLng(_currentLocation.Latitude, _currentLocation.Longitude))
+                            .SetTitle("long click"));
+                    Console.WriteLine("case 2");
+                    break;
+                case 3:
+                    touchPoint = _map.AddMarker(new MarkerOptions()
+                            .SetPosition(new LatLng(_currentLocation.Latitude, _currentLocation.Longitude))
+                            .SetTitle("long click"));
+                    Console.WriteLine("case 3");
+                    break;
+                case 4:
+                    touchPoint = _map.AddMarker(new MarkerOptions()
+                            .SetPosition(new LatLng(_currentLocation.Latitude, _currentLocation.Longitude))
+                            .SetTitle("long click"));
+                    Console.WriteLine("case 4");
+                    break;
+                case 5:
+                    touchPoint = _map.AddMarker(new MarkerOptions()
+                            .SetPosition(new LatLng(_currentLocation.Latitude, _currentLocation.Longitude))
+                            .SetTitle("long click"));
+                    Console.WriteLine("case 5");
+                    break;
+                case 6:
+                    touchPoint = _map.AddMarker(new MarkerOptions()
+                            .SetPosition(new LatLng(_currentLocation.Latitude, _currentLocation.Longitude))
+                            .SetTitle("long click"));
+                    Console.WriteLine("case 6");
+                    break;
+                default:
+                    break;
+            }
+
+            //configure this to add multiple types of icons based on which menu item 
+            
+            //note: initial marker will not be saved. Need to figure out how to access global vars here from another class. 
+            //save markers into a list to read into text file later. 
+            
+        }
+
 
         //bundled initializers
         private class initializers
